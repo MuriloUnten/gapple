@@ -131,18 +131,18 @@ func hotkeyHint(hotkey, text string) string {
 }
 
 func (m model) View() string {
-	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2)
-	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2)
+	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
+	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(mainPaneStyle.Render("13:37")),
-		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeysPaneStyle.Render(hotkeyBar())),
+		mainPaneStyle.Border(lipgloss.RoundedBorder(), true).Render("13:37"),
+		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
 	)
 }
 
 func main() {
-	program := tea.NewProgram(initialModel())
+	program := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := program.Run(); err != nil {
 		log.Fatal("Error running program: ", err)
 	}

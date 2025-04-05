@@ -9,3 +9,4 @@
 - [ ] implement set menu
 - [ ] implement preconfiguring of  timers
 - [ ] implement push to notification manager
+- [ ] implement sound notification

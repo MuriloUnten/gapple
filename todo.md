@@ -1,6 +1,6 @@
 # Bugs
 - [ ] resizing issue: when hints bar takes up 2 lines, main pane border clips off screen
-- [ ] counting negative when it reaches zero
+- [x] counting negative when it reaches zero
 - [ ] fix timer starting with zero
 
 # Features

@@ -124,6 +124,83 @@ func hotkeyBar() string {
 	)
 }
 
+func numbers() map[string]string {
+	m := make(map[string]string)
+
+	m["0"] = "█████\n" +
+			 "█   █\n" +
+			 "█   █\n" +
+			 "█   █\n" +
+			 "█████"
+
+	m["1"] = "    █\n" +
+			 "    █\n" +
+			 "    █\n" +
+			 "    █\n" +
+			 "    █"
+
+	m["2"] = "█████\n" +
+			 "    █\n" +
+			 "█████ \n" +
+			 "█    \n" +
+			 "█████"
+
+	m["3"] = "█████\n" +
+			 "    █\n" +
+			 "█████\n" +
+			 "    █\n" +
+			 "█████"
+
+	m["4"] = "█   █\n" +
+			 "█   █\n" +
+			 "█████\n" +
+			 "    █\n" +
+			 "    █"
+
+	m["5"] = "█████\n" +
+			 "█    \n" +
+			 "█████\n" +
+			 "    █\n" +
+			 "█████"
+
+	m["6"] = "█████\n" +
+			 "█    \n" +
+			 "█████\n" +
+			 "█   █\n" +
+			 "█████"
+
+	m["7"] = "█████\n" +
+			 "    █\n" +
+			 "    █\n" +
+			 "    █\n" +
+			 "    █"
+
+	m["8"] = "█████\n" +
+			 "█   █\n" +
+			 "█████\n" +
+			 "█   █\n" +
+			 "█████"
+
+	m["9"] = "█████\n" +
+			 "█   █\n" +
+			 "█████\n" +
+			 "    █\n" +
+			 "█████"
+
+	m[":"] = "     \n" +
+			 "  █  \n" +
+			 "     \n" +
+			 "  █  \n" +
+			 "     "
+
+	m[" "] = " \n" +
+			 " \n" +
+			 " \n" +
+			 " \n" +
+			 " "
+	return m
+}
+
 func hotkeyHint(hotkey, text string) string {
 	hotkeyStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#A8C4FF")).AlignHorizontal(lipgloss.Right)
 
@@ -131,12 +208,13 @@ func hotkeyHint(hotkey, text string) string {
 }
 
 func (m model) View() string {
+	n := numbers()
 	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
 	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Border(lipgloss.RoundedBorder(), true).Render("13:37"),
+		mainPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"])),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
 	)
 }

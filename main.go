@@ -116,9 +116,11 @@ func hotkeyBar() string {
 		spacer,
 		hotkeyHint("c", "clear"),
 		spacer,
-		hotkeyHint("s", "skip"),
+		hotkeyHint("s", "set"),
 		spacer,
 		hotkeyHint("q", "quit"),
+		spacer,
+		hotkeyHint("n", "next"),
 		spacer,
 		hotkeyHint("?", "help"),
 	)
@@ -209,12 +211,19 @@ func hotkeyHint(hotkey, text string) string {
 
 func (m model) View() string {
 	n := numbers()
-	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
+	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.RoundedBorder(), true)
 	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
+
+	statusText := ""
+	if m.status == FOCUS {
+		statusText = "Deep Focus"
+	} else {
+		statusText = "Chill"
+	}
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"])),
+		mainPaneStyle.Render(lipgloss.JoinVertical(lipgloss.Center, statusText, lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"]), "13:37")),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
 	)
 }

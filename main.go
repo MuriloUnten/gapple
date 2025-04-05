@@ -230,15 +230,26 @@ func numbers() map[string]string {
 }
 
 func hotkeyHint(hotkey, text string) string {
-	hotkeyStyle := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#A8C4FF")).AlignHorizontal(lipgloss.Right)
+	hotkeyStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#A8C4FF")).
+		AlignHorizontal(lipgloss.Right)
 
 	return hotkeyStyle.Render(hotkey) + " " + text
 }
 
 func (m model) View() string {
 	n := numbers()
-	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.RoundedBorder(), true)
-	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
+
+	mainPaneStyle := lipgloss.NewStyle().
+		Height(m.windowHeight - 5).
+		Width(m.windowWidth - 2).
+		Align(lipgloss.Center, lipgloss.Center).
+		Border(lipgloss.RoundedBorder(), true)
+
+	hotkeysPaneStyle := lipgloss.NewStyle().
+		Width(m.windowWidth - 2).
+		Align(lipgloss.Center, lipgloss.Center)
 
 	mainTimerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#A8C4FF"))
 	timersInfoStyle := lipgloss.NewStyle().MarginTop(1)

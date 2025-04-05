@@ -67,8 +67,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.status == FOCUS {
 				m.remainingSeconds = m.focusSeconds
 
-			}
-			if m.status == CHILL {
+			} else if m.status == CHILL {
 				m.remainingSeconds = m.chillSeconds
 			}
 
@@ -87,8 +86,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.remainingSeconds = m.chillSeconds
 				m.status = CHILL
 
-			}
-			if m.status == CHILL {
+			} else if m.status == CHILL {
 				m.remainingSeconds = m.focusSeconds
 				m.status = FOCUS
 			}

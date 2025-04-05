@@ -212,6 +212,7 @@ func (m model) View() string {
 	mainPaneStyle := lipgloss.NewStyle().Height(m.windowHeight - 5).Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center).Border(lipgloss.RoundedBorder(), true)
 	hotkeysPaneStyle := lipgloss.NewStyle().Width(m.windowWidth - 2).Align(lipgloss.Center, lipgloss.Center)
 
+	mainTimerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#A8C4FF"))
 	timersInfoStyle := lipgloss.NewStyle().MarginTop(1)
 
 	statusTextStyle := lipgloss.NewStyle().Margin(1)
@@ -224,7 +225,7 @@ func (m model) View() string {
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Render(lipgloss.JoinVertical(lipgloss.Center, statusTextStyle.Render(statusText), lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"]), timersInfoStyle.Render("13:37"), timersInfoStyle.Render("05:00"))),
+		mainPaneStyle.Render(lipgloss.JoinVertical(lipgloss.Center, statusTextStyle.Render(statusText), mainTimerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"])), timersInfoStyle.Render("13:37"), timersInfoStyle.Render("05:00"))),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
 	)
 }

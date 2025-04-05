@@ -1,4 +1,4 @@
-module projects/pomodoro-bbt
+module github.com/MuriloUnten/gapple
 
 go 1.24.1
 

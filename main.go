@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"strconv"
+	"time"
 
+	ct "github.com/MuriloUnten/gapple/timer"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -17,29 +20,39 @@ const (
 
 type model struct {
 	status Status
-	remainingSeconds int
+	timer *ct.CountdownTimer
 	focusSeconds int
 	chillSeconds int
-	paused bool
 	windowWidth int
 	windowHeight int
 }
 
 func initialModel() model {
+	timer, err := ct.NewCountdownTimer(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return model {
 		status: NONE,
-		remainingSeconds: -1,
+		timer: timer,
 		focusSeconds: 0,
 		chillSeconds: 0,
-		paused: true,
 		windowWidth: -1,
 		windowHeight: -1,
 	}
 }
 
+type TickMsg time.Time
+
+func tickEverySecond() tea.Cmd {
+    return tea.Every(time.Second, func(t time.Time) tea.Msg {
+        return TickMsg(t)
+    })
+}
+
 func (m model) Init() tea.Cmd {
-    // Just return `nil`, which means "no I/O right now, please."
-    return nil
+	return tickEverySecond()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -47,6 +60,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.windowHeight = msg.Height
 		m.windowWidth = msg.Width
+
+	case TickMsg:
+		if m.timer.paused {
+			break
+		}
+		
+		m.timer.Update(time.Time(msg))
+		return m, tickEverySecond()
 
     case tea.KeyMsg:
         switch msg.String() {
@@ -56,41 +77,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// pause
 		case " ": 
-			m.paused = !m.paused
+			m.timer.TogglePause()
 			if m.status == NONE {
 				m.status = FOCUS
 			}
 
 		// restart
 		case "r":
-			m.paused = true
-			if m.status == FOCUS {
-				m.remainingSeconds = m.focusSeconds
-
-			} else if m.status == CHILL {
-				m.remainingSeconds = m.chillSeconds
-			}
+			m.timer.Reset()
 
 		// clear
 		case "c":
 			m.status = NONE
-			m.remainingSeconds = -1
 			m.focusSeconds = 0
 			m.chillSeconds = 0
-			m.paused = true
+			m.timer.Preset(0)
 
 
 		// next
 		case "n":
 			if m.status == FOCUS {
-				m.remainingSeconds = m.chillSeconds
+				m.timer.Preset(m.chillSeconds)
 				m.status = CHILL
 
 			} else if m.status == CHILL {
-				m.remainingSeconds = m.focusSeconds
+				m.timer.Preset(m.focusSeconds)
 				m.status = FOCUS
 			}
-			m.paused = false
+			m.timer.Unpause()
 
 		// set
 		case "s":
@@ -122,6 +136,13 @@ func hotkeyBar() string {
 		spacer,
 		hotkeyHint("?", "help"),
 	)
+}
+
+func remainingTimeToString(rt time.Duration) (string, string) {
+	minutes := strconv.Itoa(int(rt.Seconds() / 60))
+	seconds := strconv.Itoa(int(rt.Seconds()) % 60)
+
+	return minutes, seconds
 }
 
 func numbers() map[string]string {
@@ -223,9 +244,34 @@ func (m model) View() string {
 		statusText = "Chill"
 	}
 
+	minutesString, secondsString := remainingTimeToString(m.timer.remainingTime)
+	characters := make([]string, 8)
+	for _, c := range minutesString {
+		characters = append(characters, n[string(c)])
+		characters = append(characters, n[" "])
+	}
+	characters = append(characters, n[":"])
+	for _, c := range secondsString {
+		characters = append(characters, n[" "])
+		characters = append(characters, n[string(c)])
+	}
+
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Render(lipgloss.JoinVertical(lipgloss.Center, statusTextStyle.Render(statusText), mainTimerStyle.Render(lipgloss.JoinHorizontal(lipgloss.Center, n["1"], n[" "], n["3"], n[" "], n[":"], n[" "], n["3"], n[" "], n["7"])), timersInfoStyle.Render("13:37"), timersInfoStyle.Render("05:00"))),
+		mainPaneStyle.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Center,
+				statusTextStyle.Render(statusText),
+				mainTimerStyle.Render(
+					lipgloss.JoinHorizontal(
+						lipgloss.Center,
+						characters...
+					),
+				),
+				timersInfoStyle.Render("13:37"),
+				timersInfoStyle.Render("05:00"),
+			),
+		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
 	)
 }

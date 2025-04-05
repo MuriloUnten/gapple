@@ -36,8 +36,8 @@ func initialModel() model {
 	return model {
 		status: NONE,
 		timer: timer,
-		focusSeconds: 0,
-		chillSeconds: 0,
+		focusSeconds: 25 * 60, // TODO: review this. The initial times are hard coded
+		chillSeconds: 5 * 60,
 		windowWidth: -1,
 		windowHeight: -1,
 	}
@@ -150,6 +150,23 @@ func remainingTimeToString(rt time.Duration) (string, string) {
 	}
 
 	return minutes, seconds
+}
+
+func secondsToTimeString(s int) string {
+	str := ""
+	minutes := strconv.Itoa(s / 60)
+	if len(minutes) == 1 {
+		minutes = "0" + minutes
+	}
+	str += minutes
+	str += ":"
+	seconds := strconv.Itoa(s % 60)
+	if len(seconds) == 1 {
+		seconds = "0" + seconds
+	}
+	str += seconds
+
+	return str
 }
 
 func numbers() map[string]string {
@@ -286,8 +303,8 @@ func (m model) View() string {
 						characters...
 					),
 				),
-				timersInfoStyle.Render("13:37"),
-				timersInfoStyle.Render("05:00"),
+				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
+				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
 			),
 		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),

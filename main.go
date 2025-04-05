@@ -25,10 +25,11 @@ type model struct {
 	chillSeconds int
 	windowWidth int
 	windowHeight int
+	tick int
 }
 
 func initialModel() model {
-	timer, err := ct.NewCountdownTimer(0)
+	timer, err := ct.NewCountdownTimer(25 * 60) // TODO gonna have to change this aswell
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,19 +41,20 @@ func initialModel() model {
 		chillSeconds: 5 * 60,
 		windowWidth: -1,
 		windowHeight: -1,
+		tick: -1,
 	}
 }
 
 type TickMsg time.Time
 
-func tickEverySecond() tea.Cmd {
-    return tea.Every(time.Second, func(t time.Time) tea.Msg {
+func tickEveryFithSecond() tea.Cmd {
+    return tea.Every(time.Millisecond * 200, func(t time.Time) tea.Msg {
         return TickMsg(t)
     })
 }
 
 func (m model) Init() tea.Cmd {
-	return tickEverySecond()
+	return tickEveryFithSecond()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -62,12 +64,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.windowWidth = msg.Width
 
 	case TickMsg:
-		if m.timer.Paused() {
-			break
-		}
-		
+		m.tick = time.Time(msg).Second()
 		m.timer.Update(time.Time(msg))
-		return m, tickEverySecond()
+		return m, tickEveryFithSecond()
 
     case tea.KeyMsg:
         switch msg.String() {
@@ -104,7 +103,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.timer.Preset(m.focusSeconds)
 				m.status = FOCUS
 			}
-			m.timer.Unpause()
 
 		// set
 		case "s":
@@ -186,7 +184,7 @@ func numbers() map[string]string {
 
 	m["2"] = "█████\n" +
 			 "    █\n" +
-			 "█████ \n" +
+			 "█████\n" +
 			 "█    \n" +
 			 "█████"
 
@@ -232,6 +230,12 @@ func numbers() map[string]string {
 			 "    █\n" +
 			 "█████"
 
+	return m
+}
+
+func specialCharacters() map[string]string {
+	m := make(map[string]string)
+
 	m[":"] = "     \n" +
 			 "  █  \n" +
 			 "     \n" +
@@ -243,6 +247,19 @@ func numbers() map[string]string {
 			 " \n" +
 			 " \n" +
 			 " "
+
+	m["p"] = "  ██ ██  \n" +
+			 "  ██ ██  \n" +
+			 "  ██ ██  \n" +
+			 "  ██ ██  \n" +
+			 "  ██ ██  "
+
+	m["u"] = "  ██     \n" +
+			 "  ████   \n" +
+			 "  ██████ \n" +
+			 "  ████   \n" +
+			 "  ██     "
+
 	return m
 }
 
@@ -257,6 +274,7 @@ func hotkeyHint(hotkey, text string) string {
 
 func (m model) View() string {
 	n := numbers()
+	sc := specialCharacters()
 
 	mainPaneStyle := lipgloss.NewStyle().
 		Height(m.windowHeight - 5).
@@ -283,12 +301,19 @@ func (m model) View() string {
 	characters := make([]string, 8)
 	for _, c := range minutesString {
 		characters = append(characters, n[string(c)])
-		characters = append(characters, n[" "])
+		characters = append(characters, sc[" "])
 	}
-	characters = append(characters, n[":"])
+	characters = append(characters, sc[":"])
 	for _, c := range secondsString {
-		characters = append(characters, n[" "])
+		characters = append(characters, sc[" "])
 		characters = append(characters, n[string(c)])
+	}
+
+	pauseIcon := ""
+	if m.timer.Paused() {
+		pauseIcon = sc["u"]
+	} else {
+		pauseIcon = sc["p"]
 	}
 
 	return lipgloss.JoinVertical(
@@ -305,6 +330,7 @@ func (m model) View() string {
 				),
 				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
 				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
+				timersInfoStyle.Render(pauseIcon),
 			),
 		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),

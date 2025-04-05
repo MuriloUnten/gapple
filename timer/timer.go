@@ -39,7 +39,7 @@ func (t *CountdownTimer) Update(tick time.Time) {
 
 	elapsedTime := tick.Sub(t.lastTime)
 	t.lastTime = tick
-	t.remainingTime = time.Duration(t.remainingTime.Seconds() - elapsedTime.Seconds()) * time.Second
+	t.remainingTime = time.Duration(t.remainingTime - elapsedTime)
 
 	if t.remainingTime.Seconds() <= 0 {
 		t.expired = true

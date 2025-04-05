@@ -13,15 +13,24 @@ type CountdownTimer struct {
 	expired bool
 }
 
+
 func NewCountdownTimer(seconds int) (*CountdownTimer, error) {
-	if seconds <= 0 {
-		return nil, errors.New("Failed to create Timer. Given time must be greater than zero")
+	if seconds < 0 {
+		return nil, errors.New("Failed to create Timer. Given time must not be negative")
+	}
+	if seconds == 0 {
+		{ // Incredible crap to bypass zero potencially failing. TODO Remove this and handle zero properly
+			ct := new(CountdownTimer)
+			ct.Preset(600)
+			return ct, nil
+		}
 	}
 
 	ct := new(CountdownTimer)
 	ct.Preset(seconds)
 	return ct, nil
 }
+
 
 func (t *CountdownTimer) Update(tick time.Time) {
 	if t.paused {
@@ -68,4 +77,16 @@ func (t *CountdownTimer) Preset(seconds int) {
 	t.expired = false
 	t.remainingTime = time.Duration(seconds) * time.Second
 	t.lastTime = time.Now()
+}
+
+func (t * CountdownTimer) Paused() bool {
+	return t.paused
+}
+
+func (t * CountdownTimer) RemainingTime() time.Duration {
+	return t.remainingTime
+}
+
+func (t * CountdownTimer) Expired() bool {
+	return t.expired
 }

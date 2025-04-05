@@ -62,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.windowWidth = msg.Width
 
 	case TickMsg:
-		if m.timer.paused {
+		if m.timer.Paused() {
 			break
 		}
 		
@@ -244,7 +244,7 @@ func (m model) View() string {
 		statusText = "Chill"
 	}
 
-	minutesString, secondsString := remainingTimeToString(m.timer.remainingTime)
+	minutesString, secondsString := remainingTimeToString(m.timer.RemainingTime())
 	characters := make([]string, 8)
 	for _, c := range minutesString {
 		characters = append(characters, n[string(c)])

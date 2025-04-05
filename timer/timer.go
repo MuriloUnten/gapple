@@ -22,12 +22,14 @@ func NewCountdownTimer(seconds int) (*CountdownTimer, error) {
 		{ // Incredible crap to bypass zero potencially failing. TODO Remove this and handle zero properly
 			ct := new(CountdownTimer)
 			ct.Preset(600)
+			ct.Pause()
 			return ct, nil
 		}
 	}
 
 	ct := new(CountdownTimer)
 	ct.Preset(seconds)
+	ct.Pause()
 	return ct, nil
 }
 
@@ -43,6 +45,8 @@ func (t *CountdownTimer) Update(tick time.Time) {
 
 	if t.remainingTime.Seconds() <= 0 {
 		t.expired = true
+		t.Pause()
+		t.remainingTime = time.Duration(0)
 	}
 }
 
@@ -73,7 +77,6 @@ func (t *CountdownTimer) Reset() {
 
 func (t *CountdownTimer) Preset(seconds int) {
 	t.seconds = seconds
-	t.paused = true
 	t.expired = false
 	t.remainingTime = time.Duration(seconds) * time.Second
 	t.lastTime = time.Now()

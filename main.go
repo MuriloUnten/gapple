@@ -19,13 +19,13 @@ const (
 )
 
 type model struct {
-	status Status
-	timer *ct.CountdownTimer
+	status       Status
+	timer        *ct.CountdownTimer
 	focusSeconds int
 	chillSeconds int
-	windowWidth int
+	windowWidth  int
 	windowHeight int
-	tick int
+	tick         int
 }
 
 func initialModel() model {
@@ -34,23 +34,23 @@ func initialModel() model {
 		log.Fatal(err)
 	}
 
-	return model {
-		status: NONE,
-		timer: timer,
+	return model{
+		status:       NONE,
+		timer:        timer,
 		focusSeconds: 25 * 60, // TODO: review this. The initial times are hard coded
 		chillSeconds: 5 * 60,
-		windowWidth: -1,
+		windowWidth:  -1,
 		windowHeight: -1,
-		tick: -1,
+		tick:         -1,
 	}
 }
 
 type TickMsg time.Time
 
 func tickEveryFithSecond() tea.Cmd {
-    return tea.Every(time.Millisecond * 200, func(t time.Time) tea.Msg {
-        return TickMsg(t)
-    })
+	return tea.Every(time.Millisecond*200, func(t time.Time) tea.Msg {
+		return TickMsg(t)
+	})
 }
 
 func (m model) Init() tea.Cmd {
@@ -58,7 +58,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    switch msg := msg.(type) {
+	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.windowHeight = msg.Height
 		m.windowWidth = msg.Width
@@ -68,14 +68,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.timer.Update(time.Time(msg))
 		return m, tickEveryFithSecond()
 
-    case tea.KeyMsg:
-        switch msg.String() {
+	case tea.KeyMsg:
+		switch msg.String() {
 		// quit
-        case "ctrl+c", "q":
-            return m, tea.Quit
+		case "ctrl+c", "q":
+			return m, tea.Quit
 
 		// pause
-		case " ": 
+		case " ":
 			m.timer.TogglePause()
 			if m.status == NONE {
 				m.status = FOCUS
@@ -91,7 +91,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.focusSeconds = 0
 			m.chillSeconds = 0
 			m.timer.Preset(0)
-
 
 		// next
 		case "n":
@@ -110,10 +109,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// help
 		case "?":
 
-        }
-    }
+		}
+	}
 
-    return m, nil
+	return m, nil
 }
 
 func hotkeyBar() string {
@@ -171,64 +170,64 @@ func numbers() map[string]string {
 	m := make(map[string]string)
 
 	m["0"] = "█████\n" +
-			 "█   █\n" +
-			 "█   █\n" +
-			 "█   █\n" +
-			 "█████"
+		"█   █\n" +
+		"█   █\n" +
+		"█   █\n" +
+		"█████"
 
 	m["1"] = "    █\n" +
-			 "    █\n" +
-			 "    █\n" +
-			 "    █\n" +
-			 "    █"
+		"    █\n" +
+		"    █\n" +
+		"    █\n" +
+		"    █"
 
 	m["2"] = "█████\n" +
-			 "    █\n" +
-			 "█████\n" +
-			 "█    \n" +
-			 "█████"
+		"    █\n" +
+		"█████\n" +
+		"█    \n" +
+		"█████"
 
 	m["3"] = "█████\n" +
-			 "    █\n" +
-			 "█████\n" +
-			 "    █\n" +
-			 "█████"
+		"    █\n" +
+		"█████\n" +
+		"    █\n" +
+		"█████"
 
 	m["4"] = "█   █\n" +
-			 "█   █\n" +
-			 "█████\n" +
-			 "    █\n" +
-			 "    █"
+		"█   █\n" +
+		"█████\n" +
+		"    █\n" +
+		"    █"
 
 	m["5"] = "█████\n" +
-			 "█    \n" +
-			 "█████\n" +
-			 "    █\n" +
-			 "█████"
+		"█    \n" +
+		"█████\n" +
+		"    █\n" +
+		"█████"
 
 	m["6"] = "█████\n" +
-			 "█    \n" +
-			 "█████\n" +
-			 "█   █\n" +
-			 "█████"
+		"█    \n" +
+		"█████\n" +
+		"█   █\n" +
+		"█████"
 
 	m["7"] = "█████\n" +
-			 "    █\n" +
-			 "    █\n" +
-			 "    █\n" +
-			 "    █"
+		"    █\n" +
+		"    █\n" +
+		"    █\n" +
+		"    █"
 
 	m["8"] = "█████\n" +
-			 "█   █\n" +
-			 "█████\n" +
-			 "█   █\n" +
-			 "█████"
+		"█   █\n" +
+		"█████\n" +
+		"█   █\n" +
+		"█████"
 
 	m["9"] = "█████\n" +
-			 "█   █\n" +
-			 "█████\n" +
-			 "    █\n" +
-			 "█████"
+		"█   █\n" +
+		"█████\n" +
+		"    █\n" +
+		"█████"
 
 	return m
 }
@@ -237,28 +236,28 @@ func specialCharacters() map[string]string {
 	m := make(map[string]string)
 
 	m[":"] = "     \n" +
-			 "  █  \n" +
-			 "     \n" +
-			 "  █  \n" +
-			 "     "
+		"  █  \n" +
+		"     \n" +
+		"  █  \n" +
+		"     "
 
 	m[" "] = " \n" +
-			 " \n" +
-			 " \n" +
-			 " \n" +
-			 " "
+		" \n" +
+		" \n" +
+		" \n" +
+		" "
 
 	m["p"] = "  ██ ██  \n" +
-			 "  ██ ██  \n" +
-			 "  ██ ██  \n" +
-			 "  ██ ██  \n" +
-			 "  ██ ██  "
+		"  ██ ██  \n" +
+		"  ██ ██  \n" +
+		"  ██ ██  \n" +
+		"  ██ ██  "
 
 	m["u"] = "  ██     \n" +
-			 "  ████   \n" +
-			 "  ██████ \n" +
-			 "  ████   \n" +
-			 "  ██     "
+		"  ████   \n" +
+		"  ██████ \n" +
+		"  ████   \n" +
+		"  ██     "
 
 	return m
 }
@@ -277,13 +276,13 @@ func (m model) View() string {
 	sc := specialCharacters()
 
 	mainPaneStyle := lipgloss.NewStyle().
-		Height(m.windowHeight - 5).
-		Width(m.windowWidth - 2).
+		Height(m.windowHeight-5).
+		Width(m.windowWidth-2).
 		Align(lipgloss.Center, lipgloss.Center).
 		Border(lipgloss.RoundedBorder(), true)
 
 	hotkeysPaneStyle := lipgloss.NewStyle().
-		Width(m.windowWidth - 2).
+		Width(m.windowWidth-2).
 		Align(lipgloss.Center, lipgloss.Center)
 
 	mainTimerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#A8C4FF"))
@@ -309,6 +308,7 @@ func (m model) View() string {
 		characters = append(characters, n[string(c)])
 	}
 
+	pauseIconStyle := lipgloss.NewStyle().Margin(1).Foreground(lipgloss.Color("#A8C4FF"))
 	pauseIcon := ""
 	if m.timer.Paused() {
 		pauseIcon = sc["u"]
@@ -325,12 +325,12 @@ func (m model) View() string {
 				mainTimerStyle.Render(
 					lipgloss.JoinHorizontal(
 						lipgloss.Center,
-						characters...
+						characters...,
 					),
 				),
 				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
 				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
-				timersInfoStyle.Render(pauseIcon),
+				pauseIconStyle.Render(pauseIcon),
 			),
 		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),

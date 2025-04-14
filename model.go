@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var Hints = ""
+
 type Model struct {
 	status       Status
 	timer        *ct.CountdownTimer
@@ -69,21 +71,21 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func hotkeyBar() string {
 	spacer := "        "
+
+	keybinds := make([]string, 0)
+	firstIteration := true
+	for _, bind := range Hotkeys() {
+		if !firstIteration {
+			keybinds = append(keybinds, spacer)
+		}
+		hint := hotkeyHint(bind.hotkeyText, bind.shortDescription)
+		keybinds = append(keybinds, hint)
+		firstIteration = false
+	}
+
 	return lipgloss.JoinHorizontal(
 		lipgloss.Center,
-		hotkeyHint("r", "restart"),
-		spacer,
-		hotkeyHint("spc", "toggle pause"),
-		spacer,
-		hotkeyHint("c", "clear"),
-		spacer,
-		hotkeyHint("s", "set"),
-		spacer,
-		hotkeyHint("q", "quit"),
-		spacer,
-		hotkeyHint("n", "next"),
-		spacer,
-		hotkeyHint("?", "help"),
+		keybinds...,
 	)
 }
 
@@ -285,12 +287,13 @@ func (m Model) View() string {
 				pauseIconStyle.Render(pauseIcon),
 			),
 		),
-		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(hotkeyBar()),
+		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(Hints),
 	)
 }
 
 func RunProgram() {
 	LoadHotkeys()
+	Hints = hotkeyBar()
 	program := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := program.Run(); err != nil {
 		log.Fatal("Error running program: ", err)

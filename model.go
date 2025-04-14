@@ -6,11 +6,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"log"
-	"strconv"
 	"time"
 )
 
 var Hints = ""
+var Numbers = numbers()
+var Specials = specialCharacters()
 
 type Model struct {
 	status       Status
@@ -89,133 +90,6 @@ func hotkeyBar() string {
 	)
 }
 
-func remainingTimeToString(rt time.Duration) (string, string) {
-	minutes := strconv.Itoa(int(rt.Seconds() / 60))
-	if len(minutes) == 1 {
-		minutes = "0" + minutes
-	}
-
-	seconds := strconv.Itoa(int(rt.Seconds()) % 60)
-	if len(seconds) == 1 {
-		seconds = "0" + seconds
-	}
-
-	return minutes, seconds
-}
-
-func secondsToTimeString(s int) string {
-	str := ""
-	minutes := strconv.Itoa(s / 60)
-	if len(minutes) == 1 {
-		minutes = "0" + minutes
-	}
-	str += minutes
-	str += ":"
-	seconds := strconv.Itoa(s % 60)
-	if len(seconds) == 1 {
-		seconds = "0" + seconds
-	}
-	str += seconds
-
-	return str
-}
-
-func numbers() map[string]string {
-	m := make(map[string]string)
-
-	m["0"] = "█████\n" +
-		"█   █\n" +
-		"█   █\n" +
-		"█   █\n" +
-		"█████"
-
-	m["1"] = "    █\n" +
-		"    █\n" +
-		"    █\n" +
-		"    █\n" +
-		"    █"
-
-	m["2"] = "█████\n" +
-		"    █\n" +
-		"█████\n" +
-		"█    \n" +
-		"█████"
-
-	m["3"] = "█████\n" +
-		"    █\n" +
-		"█████\n" +
-		"    █\n" +
-		"█████"
-
-	m["4"] = "█   █\n" +
-		"█   █\n" +
-		"█████\n" +
-		"    █\n" +
-		"    █"
-
-	m["5"] = "█████\n" +
-		"█    \n" +
-		"█████\n" +
-		"    █\n" +
-		"█████"
-
-	m["6"] = "█████\n" +
-		"█    \n" +
-		"█████\n" +
-		"█   █\n" +
-		"█████"
-
-	m["7"] = "█████\n" +
-		"    █\n" +
-		"    █\n" +
-		"    █\n" +
-		"    █"
-
-	m["8"] = "█████\n" +
-		"█   █\n" +
-		"█████\n" +
-		"█   █\n" +
-		"█████"
-
-	m["9"] = "█████\n" +
-		"█   █\n" +
-		"█████\n" +
-		"    █\n" +
-		"█████"
-
-	return m
-}
-
-func specialCharacters() map[string]string {
-	m := make(map[string]string)
-
-	m[":"] = "     \n" +
-		"  █  \n" +
-		"     \n" +
-		"  █  \n" +
-		"     "
-
-	m[" "] = " \n" +
-		" \n" +
-		" \n" +
-		" \n" +
-		" "
-
-	m["p"] = "  ██ ██  \n" +
-		"  ██ ██  \n" +
-		"  ██ ██  \n" +
-		"  ██ ██  \n" +
-		"  ██ ██  "
-
-	m["u"] = "  ██     \n" +
-		"  ████   \n" +
-		"  ██████ \n" +
-		"  ████   \n" +
-		"  ██     "
-
-	return m
-}
-
 func hotkeyHint(hotkey, text string) string {
 	hotkeyStyle := lipgloss.NewStyle().
 		Bold(true).
@@ -226,9 +100,6 @@ func hotkeyHint(hotkey, text string) string {
 }
 
 func (m Model) View() string {
-	n := numbers()
-	sc := specialCharacters()
-
 	mainPaneStyle := lipgloss.NewStyle().
 		Height(m.windowHeight-5).
 		Width(m.windowWidth-2).
@@ -241,34 +112,18 @@ func (m Model) View() string {
 
 	mainTimerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#A8C4FF"))
 	timersInfoStyle := lipgloss.NewStyle().MarginTop(1)
-
 	statusTextStyle := lipgloss.NewStyle().Margin(1)
-	statusText := ""
-	if m.status == FOCUS {
-		statusText = "Deep Focus"
-	} else if m.status == CHILL {
-		statusText = "Chill"
-	}
 
+	// Load status text
+	statusText := statusText(m.status)
+
+	// Load timer characters
 	minutesString, secondsString := remainingTimeToString(m.timer.RemainingTime())
-	characters := make([]string, 8)
-	for _, c := range minutesString {
-		characters = append(characters, n[string(c)])
-		characters = append(characters, sc[" "])
-	}
-	characters = append(characters, sc[":"])
-	for _, c := range secondsString {
-		characters = append(characters, sc[" "])
-		characters = append(characters, n[string(c)])
-	}
+	characters := timerCharacters(minutesString, secondsString)
 
+	// Load pause icon
 	pauseIconStyle := lipgloss.NewStyle().Margin(1).Foreground(lipgloss.Color("#A8C4FF"))
-	pauseIcon := ""
-	if m.timer.Paused() {
-		pauseIcon = sc["u"]
-	} else {
-		pauseIcon = sc["p"]
-	}
+	pauseIcon := pauseStatusIcon(m.timer.Paused())
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
@@ -289,6 +144,39 @@ func (m Model) View() string {
 		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(Hints),
 	)
+}
+
+func timerCharacters(minutes, seconds string) []string {
+	characters := make([]string, 8)
+	for _, c := range minutes {
+		characters = append(characters, Numbers[string(c)])
+		characters = append(characters, Specials[" "])
+	}
+	characters = append(characters, Specials[":"])
+	for _, c := range seconds {
+		characters = append(characters, Specials[" "])
+		characters = append(characters, Numbers[string(c)])
+	}
+
+	return characters
+}
+
+func pauseStatusIcon(paused bool) string {
+	if paused {
+		return Specials["u"]
+	} else {
+		return Specials["p"]
+	}
+}
+
+func statusText(status Status) string {
+	if status == FOCUS {
+		return "Deep Focus"
+	} else if status == CHILL {
+		return "Chill"
+	}
+
+	return ""
 }
 
 func RunProgram() {

@@ -122,7 +122,7 @@ func (m Model) View() string {
 	characters := timerCharacters(minutesString, secondsString)
 
 	// Load pause icon
-	pauseIconStyle := lipgloss.NewStyle().Margin(1).Foreground(lipgloss.Color("#A8C4FF"))
+	pauseIconStyle := lipgloss.NewStyle().MarginTop(2).Foreground(lipgloss.Color("#A8C4FF"))
 	pauseIcon := pauseStatusIcon(m.timer.Paused())
 
 	return lipgloss.JoinVertical(
@@ -137,9 +137,9 @@ func (m Model) View() string {
 						characters...,
 					),
 				),
+				pauseIconStyle.Render(pauseIcon),
 				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
 				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
-				pauseIconStyle.Render(pauseIcon),
 			),
 		),
 		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(Hints),

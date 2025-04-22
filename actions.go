@@ -51,6 +51,7 @@ func (m Model) NextAction() (Model, tea.Cmd) {
 // TODO Implement
 // set
 func (m Model) SetAction() (Model, tea.Cmd) {
+	m.mode = SET
 
 	return m, nil
 }

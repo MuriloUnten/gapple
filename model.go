@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+type Mode int
+
+const (
+	TIMER Mode = iota
+	HELP
+	SET
+)
+
 var Hints = ""
 var Numbers = numbers()
 var Specials = specialCharacters()
@@ -21,6 +29,7 @@ type Model struct {
 	windowWidth  int
 	windowHeight int
 	tick         int
+	mode         Mode
 }
 
 func initialModel() Model {
@@ -37,6 +46,7 @@ func initialModel() Model {
 		windowWidth:  -1,
 		windowHeight: -1,
 		tick:         -1,
+		mode:         TIMER,
 	}
 }
 
@@ -100,49 +110,11 @@ func hotkeyHint(hotkey, text string) string {
 }
 
 func (m Model) View() string {
-	mainPaneStyle := lipgloss.NewStyle().
-		Height(m.windowHeight-5).
-		Width(m.windowWidth-2).
-		Align(lipgloss.Center, lipgloss.Center).
-		Border(lipgloss.RoundedBorder(), true)
-
-	hotkeysPaneStyle := lipgloss.NewStyle().
-		Width(m.windowWidth-2).
-		Align(lipgloss.Center, lipgloss.Center)
-
-	mainTimerStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#A8C4FF"))
-	timersInfoStyle := lipgloss.NewStyle().MarginTop(1)
-	statusTextStyle := lipgloss.NewStyle().Margin(1)
-
-	// Load status text
-	statusText := statusText(m.status)
-
-	// Load timer characters
-	minutesString, secondsString := remainingTimeToString(m.timer.RemainingTime())
-	characters := timerCharacters(minutesString, secondsString)
-
-	// Load pause icon
-	pauseIconStyle := lipgloss.NewStyle().MarginTop(2).Foreground(lipgloss.Color("#A8C4FF"))
-	pauseIcon := pauseStatusIcon(m.timer.Paused())
 
 	return lipgloss.JoinVertical(
 		lipgloss.Center,
-		mainPaneStyle.Render(
-			lipgloss.JoinVertical(
-				lipgloss.Center,
-				statusTextStyle.Render(statusText),
-				mainTimerStyle.Render(
-					lipgloss.JoinHorizontal(
-						lipgloss.Center,
-						characters...,
-					),
-				),
-				pauseIconStyle.Render(pauseIcon),
-				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
-				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
-			),
-		),
-		hotkeysPaneStyle.Border(lipgloss.RoundedBorder(), true).Render(Hints),
+		mainPane(m),
+		hotkeyPane(m),
 	)
 }
 
@@ -177,6 +149,51 @@ func statusText(status Status) string {
 	}
 
 	return ""
+}
+
+func mainPane(m Model) string {
+	mainPaneStyle := mainPaneStyle(m)
+	mainTimerStyle := mainTimerStyle()
+	timersInfoStyle := timersInfoStyle()
+	statusTextStyle := statusTextStyle()
+
+	// Load status text
+	statusText := statusText(m.status)
+
+	// Load timer characters
+	minutesString, secondsString := remainingTimeToString(m.timer.RemainingTime())
+	characters := timerCharacters(minutesString, secondsString)
+
+	// Load pause icon
+	pauseIconStyle := lipgloss.NewStyle().MarginTop(2).Foreground(lipgloss.Color("#A8C4FF"))
+	pauseIcon := pauseStatusIcon(m.timer.Paused())
+
+	switch m.mode {
+	case TIMER:
+		return mainPaneStyle.Render(
+			lipgloss.JoinVertical(
+				lipgloss.Center,
+				statusTextStyle.Render(statusText),
+				mainTimerStyle.Render(
+					lipgloss.JoinHorizontal(
+						lipgloss.Center,
+						characters...,
+					),
+				),
+				pauseIconStyle.Render(pauseIcon),
+				timersInfoStyle.Render(secondsToTimeString(m.focusSeconds)),
+				timersInfoStyle.Render(secondsToTimeString(m.chillSeconds)),
+			),
+		)
+	case SET:
+	case HELP:
+	}
+	return ""
+}
+
+func hotkeyPane(m Model) string {
+	hotkeysPaneStyle := hotkeysPaneStyle(m)
+	return hotkeysPaneStyle.Render(Hints)
 }
 
 func RunProgram() {
